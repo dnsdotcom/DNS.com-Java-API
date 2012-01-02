@@ -1,0 +1,4 @@
+A Java implementation of the DNS.com API.
+
+This API requires the SLF4J library in order to perform logging.
+See the SLF4J web site for information on how to use that library (http://www.slf4j.org/)
