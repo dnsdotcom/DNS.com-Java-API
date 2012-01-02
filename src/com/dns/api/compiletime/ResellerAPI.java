@@ -94,7 +94,7 @@ public class ResellerAPI extends GenericAPI {
 			JSONObject response = new JSONObject() ;
 			try {
 				response.put("meta", new JSONObject("\"success\": 0, \"error\": \"Passwords do not match\"")) ;
-				response.put("data", null) ;
+				response.put("data", "") ;
 			} catch (JSONException je) {
 				je.printStackTrace() ;
 			}

@@ -8,10 +8,7 @@ package com.dns.api.compiletime;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-
 import org.json.JSONObject;
-
-import android.util.Log;
 
 /**
  * An implementation of the Management API which validates arguments at compile time
@@ -1134,56 +1131,61 @@ public class ManagementAPI extends GenericAPI {
 			@optional string `description` description  for URLFrame record
 		 */
 		StringBuilder uriBuilder = new StringBuilder("/api/updateRRData/?") ;
-		Log.d("ManagementAPI","Setting API Token") ;
+		log.debug("Setting API Token") ;
 		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
 
 		uriBuilder.append("&rr_id="+rrId) ;
-		Log.d("ManagementAPI","Setting RR ID") ;
+		log.debug("Setting RR ID") ;
 		uriBuilder.append("&rdata="+rdata) ;
-		Log.d("ManagementAPI","Setting RR rdata") ;
+		log.debug("Setting RR rdata") ;
 		if (ttl!=null) {
-			Log.d("ManagementAPI","Setting RR TTL") ;
+			log.debug("Setting RR TTL") ;
 			uriBuilder.append("&ttl="+ttl) ;
 		}
 		if (priority!=null) {
-			Log.d("ManagementAPI","Setting RR priority") ;
+			log.debug("Setting RR priority") ;
 			uriBuilder.append("&priority="+priority) ;
 		}
 		if (isWildcard.booleanValue()) {
-			Log.d("ManagementAPI","Setting RR isWildcard") ;
+			log.debug("Setting RR isWildcard") ;
 			uriBuilder.append("&is_wildcard="+Boolean.toString(isWildcard)) ;
 		}
 		if (retry!=null) {
-			Log.d("ManagementAPI","Setting RR retry") ;
+			log.debug("Setting RR retry") ;
 			uriBuilder.append("&retry="+retry) ;
 		}
 		if (expire!=null) {
-			Log.d("ManagementAPI","Setting RR expire") ;
+			log.debug("Setting RR expire") ;
 			uriBuilder.append("&expire="+expire) ;
 		}
 		if (minimum!=null) {
-			Log.d("ManagementAPI","Setting RR minimum") ;
+			log.debug("Setting RR minimum") ;
 			uriBuilder.append("&minimum="+minimum) ;
 		}
 		if (weight!=null) {
-			Log.d("ManagementAPI","Setting RR weight") ;
+			log.debug("Setting RR weight") ;
 			uriBuilder.append("&weight="+weight) ;
 		}
 		if (port!=null) {
-			Log.d("ManagementAPI","Setting RR port") ;
+			log.debug("Setting RR port") ;
 			uriBuilder.append("&port="+port) ;
 		}
-		if (title!=null) {
-			Log.d("ManagementAPI","Setting RR title") ;
-			uriBuilder.append("&title="+URLEncoder.encode(title)) ;
-		}
-		if (keywords!=null) {
-			Log.d("ManagementAPI","Setting RR keywords") ;
-			uriBuilder.append("&keywords="+URLEncoder.encode(keywords)) ;
-		}
-		if (description!=null) {
-			Log.d("ManagementAPI","Setting RR description") ;
-			uriBuilder.append("&description="+URLEncoder.encode(description)) ;
+		try {
+			if (title!=null) {
+				log.debug("Setting RR title") ;
+				uriBuilder.append("&title="+URLEncoder.encode(title,"UTF-8")) ;
+			}
+			if (keywords!=null) {
+				log.debug("Setting RR keywords") ;
+				uriBuilder.append("&keywords="+URLEncoder.encode(keywords,"UTF-8")) ;
+			}
+			if (description!=null) {
+				log.debug("Setting RR description") ;
+				uriBuilder.append("&description="+URLEncoder.encode(description,"UTF-8")) ;
+			}
+		} catch (UnsupportedEncodingException e) {
+			// This catch block should never be reached on any normal Java platform.
+			log.error("UnsupportedEncodingException while attempting to URL Encode text", e) ;
 		}
 
 		return makeHttpRequest(uriBuilder.toString()) ;

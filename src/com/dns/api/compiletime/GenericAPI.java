@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import android.util.Log;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -18,6 +17,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -30,6 +31,7 @@ public class GenericAPI {
 	protected String apiToken = null ;
 	protected String lastRequestURL = null ;
 	protected String lastRequestResult = null ;
+	protected Logger log = null ;
 
 	/**
 	 * Constructor
@@ -39,6 +41,7 @@ public class GenericAPI {
 	 */
 	public GenericAPI(String apiHost, boolean useSSL, String apiToken) {
 		super() ;
+		this.log = LoggerFactory.getLogger(GenericAPI.class.getSimpleName()) ;
 		this.apiHost = apiHost ;
 		this.useSSL = useSSL ;
 		try {
@@ -107,28 +110,28 @@ public class GenericAPI {
 		request.addHeader("User-Agent", "DNS-Android") ;
 		HttpResponse answer = null ;
 		try {
-			Log.d("GenericAPI", "Sending request to "+protocol+"://"+apiHost+uri+"&isAndroid=true") ;
+			log.debug("Sending request to "+protocol+"://"+apiHost+uri+"&isAndroid=true") ;
 			answer = client.execute(request) ;
-			Log.d("GenericAPI", "API HTTP Request Completed.") ;
+			log.debug("API HTTP Request Completed.") ;
 		} catch (ClientProtocolException cpe) {
-			Log.e("GenericAPI", "ClientProtocolException when trying to request API URL", cpe) ;
+			log.debug("ClientProtocolException when trying to request API URL", cpe) ;
 			response = new JSONObject() ;
 			try {
 				response.put("error", cpe.getLocalizedMessage());
 				response.put("breadcrumb", breadCrumbs) ;
 				response.put("stackTrace", serializeStackTrace(cpe.getStackTrace()));
 			} catch (JSONException jsone) {
-				Log.e("GenericAPI.makeHttpRequest()", cpe.getLocalizedMessage(), cpe) ;
+				log.error(cpe.getLocalizedMessage(), cpe) ;
 			}
 		} catch (IOException ioe) {
-			Log.e("GenericAPI", "IOException when trying to request API URL", ioe) ;
+			log.error("IOException when trying to request API URL", ioe) ;
 			response = new JSONObject() ;
 			try {
 				response.put("error", ioe.getLocalizedMessage());
 				response.put("breadcrumb", breadCrumbs) ;
 				response.put("stackTrace", serializeStackTrace(ioe.getStackTrace()));
 			} catch (JSONException jsone) {
-				Log.e("GenericAPI.makeHttpRequest()", jsone.getLocalizedMessage(), jsone) ;
+				log.error(jsone.getLocalizedMessage(), jsone) ;
 			}
 		}
 
@@ -138,76 +141,76 @@ public class GenericAPI {
 				isValidStatus = true ;
 			}
 		} else {
-			Log.e("GenericAPI", "The HTTP answer object is null!!") ;
+			log.error("The HTTP answer object is null!!") ;
 			response = new JSONObject() ;
 			try {
 				response.put("error", "HttpClient response is null.");
 				response.put("breadcrumb", breadCrumbs) ;
 			} catch (JSONException jsone) {
-				Log.e("GenericAPI.makeHttpRequest()", jsone.getLocalizedMessage(), jsone) ;
+				log.error(jsone.getLocalizedMessage(), jsone) ;
 			}
 		}
 
 		if (isValidStatus) {
-			Log.d("GenericAPI","HTTP Response status is 200 OK") ;
+			log.debug("HTTP Response status is 200 OK") ;
 			try {
 				BufferedReader bis = new BufferedReader(new InputStreamReader(answer.getEntity().getContent())) ;
 				StringBuilder responseText = new StringBuilder() ;
 				String line = null ;
-				Log.d("GenericAPI", "Reading in the response body.") ;
+				log.debug("Reading in the response body.") ;
 				while ((line = bis.readLine()) != null) {
 					responseText.append(line) ;
 				}
-				Log.d("GenericAPI", "Response body read and stored\n\n"+responseText.toString()+"\n") ;
+				log.debug("Response body read and stored\n\n"+responseText.toString()+"\n") ;
 				response = new JSONObject(responseText.toString()) ;
 			} catch (IOException ioe) {
-				Log.e("GenericAPI", "IOException when trying to read response body", ioe) ;
+				log.error("IOException when trying to read response body", ioe) ;
 				response = new JSONObject() ;
 				try {
 					response.put("error", ioe.getLocalizedMessage());
 					response.put("breadcrumb", breadCrumbs) ;
 					response.put("stackTrace", serializeStackTrace(ioe.getStackTrace()));
 				} catch (JSONException jsone) {
-					Log.e("GenericAPI.makeHttpRequest()", jsone.getLocalizedMessage(), jsone) ;
+					log.error(jsone.getLocalizedMessage(), jsone) ;
 				}
 			} catch (JSONException jsone) {
-				Log.e("GenericAPI", "JSONException encountered while parsing request body.", jsone) ;
+				log.error("JSONException encountered while parsing request body.", jsone) ;
 				response = new JSONObject() ;
 				try {
 					response.put("error", jsone.getLocalizedMessage());
 					response.put("breadcrumb", breadCrumbs) ;
 					response.put("stackTrace", serializeStackTrace(jsone.getStackTrace()));
 				} catch (JSONException jsone1) {
-					Log.e("GenericAPI.makeHttpRequest()", jsone1.getLocalizedMessage(), jsone1) ;
+					log.error(jsone1.getLocalizedMessage(), jsone1) ;
 				}
 			}
 		} else {
-			Log.d("GenericAPI", "Status '"+answer.getStatusLine().getStatusCode()+"' was not valid") ;
+			log.debug("Status '"+answer.getStatusLine().getStatusCode()+"' was not valid") ;
 			BufferedReader bis = null ;
 			try {
 				bis = new BufferedReader(new InputStreamReader(answer.getEntity().getContent()));
 			} catch (IllegalStateException e) {
-				Log.e("GenericAPI", e.getLocalizedMessage(), e) ;
+				log.error(e.getLocalizedMessage(), e) ;
 			} catch (IOException e) {
-				Log.e("GenericAPI", e.getLocalizedMessage(), e) ;
+				log.error(e.getLocalizedMessage(), e) ;
 			}
 			StringBuilder responseText = new StringBuilder() ;
 			String line = null ;
-			Log.d("GenericAPI", "Reading in the response body.") ;
+			log.debug("Reading in the response body.") ;
 			try {
 				while ((line = bis.readLine()) != null) {
 					responseText.append(line) ;
 				}
 			} catch (IOException e) {
-				Log.e("GenericAPI", e.getLocalizedMessage(), e) ;
+				log.error(e.getLocalizedMessage(), e) ;
 			}
-			Log.d("GenericAPI", "Response body read and stored\n\n"+responseText.toString()+"\n") ;
+			log.debug("Response body read and stored\n\n"+responseText.toString()+"\n") ;
 			response = new JSONObject() ;
 			try {
 				response.put("error", "HttpClient response has code '"+answer.getStatusLine().getStatusCode()+"'.");
 				response.put("breadcrumb", breadCrumbs) ;
 			} catch (JSONException jsone) {
-				Log.e("GenericAPI.makeHttpRequest()", jsone.getLocalizedMessage(), jsone) ;
+				log.error(jsone.getLocalizedMessage(), jsone) ;
 			}
 		}
 
