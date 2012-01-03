@@ -7,7 +7,11 @@
 package com.dns.api.compiletime;
 
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -1105,31 +1109,16 @@ public class ManagementAPI extends GenericAPI {
 	 * @param ttl (OPTIONAL) The Time-to-live to be set or <code>NULL</code> for the default TTL
 	 * @param priority (OPTIONAL) The priority to set for MX/SRV records or <code>NULL</code> to leave unchanged.
 	 * @param isWildcard (OPTIONAL) Set TRUE if this is a wildcard record, or <code>NULL</code> or FALSE.
+	 * @param geoGroup The name of a GeoLocation group to assign for this resource record. (Can be NULL, Cannot be used with country/region/city)
+	 * @param country The name of a country to assign for GeoLocation based responses (Can be NULL, Cannot be used with geoGroup)
+	 * @param region The name of a region to assign for GeoLocation based responses (Can be NULL, Requires country to be set as well)
+	 * @param city The name of a city to assign for GeoLocation based responses (Can be NULL, Requires region to be set as well)
 	 * @return A {@link JSONObject} containing the JSON response or an error code.
 	 */
-	public JSONObject updateRRData(int rrId, String rdata, Integer ttl, Integer priority, Boolean isWildcard, 
+	public JSONObject updateRRData(Integer rrId, String rdata, Integer ttl, Integer priority, Boolean isWildcard, 
 			Integer retry, Integer expire, Integer minimum, Integer weight, Integer port, String title, 
-			String keywords, String description) {
-		/*
-			@required integer `rr_id` rdata id as queried from server.
-			@required string `rdata` answer data
-			
-			@optional integer `ttl` Time To Live for resolvers to hold cache of rdata, between 1 and 604800 ( 7 days )
-			@optional integer `priority` 0,5,15,20,25 MX preferences
-			@optioanl boolean `is_wildcard` is this a wildcard record or not
-			
-			@optional string `retry` retry for SOA record, between 0 and 2147483647L (32bit)
-			@optional string `expire` expire for SOA record, between 0 and 2147483647L (32bit)
-			@optional string `minimum` minimum for SOA record, between 0 and 2147483647L (32bit)
-			
-			@optional string `weight` weight for SRV record, between 0 and 65535 (16bit)
-			@optional string `port` port for SRV record, between 0 and 65535 (16bit)
-			@optional string `priority` priority  for SRV record, between 0 and 2147483647L (32bit)
-			
-			@optional string `title` title for URLFrame record
-			@optional string `keywords` keywords for URLFrame record-
-			@optional string `description` description  for URLFrame record
-		 */
+			String keywords, String description, String geoGroup, String country, String region, String city) {
+
 		StringBuilder uriBuilder = new StringBuilder("/api/updateRRData/?") ;
 		log.debug("Setting API Token") ;
 		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
@@ -1142,34 +1131,56 @@ public class ManagementAPI extends GenericAPI {
 			log.debug("Setting RR TTL") ;
 			uriBuilder.append("&ttl="+ttl) ;
 		}
+		
 		if (priority!=null) {
 			log.debug("Setting RR priority") ;
 			uriBuilder.append("&priority="+priority) ;
 		}
+		
 		if (isWildcard.booleanValue()) {
 			log.debug("Setting RR isWildcard") ;
 			uriBuilder.append("&is_wildcard="+Boolean.toString(isWildcard)) ;
 		}
+		
 		if (retry!=null) {
 			log.debug("Setting RR retry") ;
 			uriBuilder.append("&retry="+retry) ;
 		}
+		
 		if (expire!=null) {
 			log.debug("Setting RR expire") ;
 			uriBuilder.append("&expire="+expire) ;
 		}
+		
 		if (minimum!=null) {
 			log.debug("Setting RR minimum") ;
 			uriBuilder.append("&minimum="+minimum) ;
 		}
+		
 		if (weight!=null) {
 			log.debug("Setting RR weight") ;
 			uriBuilder.append("&weight="+weight) ;
 		}
+		
 		if (port!=null) {
 			log.debug("Setting RR port") ;
 			uriBuilder.append("&port="+port) ;
 		}
+
+		if (geoGroup!=null) {
+			uriBuilder.append("&geoGroup=").append(geoGroup) ;
+		}
+
+		if (country!=null) {
+			uriBuilder.append("&country=").append(country) ;
+			if (region!=null) {
+				uriBuilder.append("&region=").append(region) ;
+				if (city!=null) {
+					uriBuilder.append("&city=").append(city) ;
+				}
+			}
+		}
+		
 		try {
 			if (title!=null) {
 				log.debug("Setting RR title") ;
@@ -1194,16 +1205,264 @@ public class ManagementAPI extends GenericAPI {
 	/**
 	 * Create a new XFR configuration for the named domain/sub
 	 * @param domain The name of the domain to create an XFR configuration for
-	 * @param host This host indicates the "sub" domain that the XFR will work on, set as NULL to create XFR for the root of the domain
+	 * @param host This host indicates the "sub" domain that the XFR will work on, set as NULL to create XFR for the root of the domain (Can be null)
 	 * @param master The IP address of the master server which we will poll to get updates and we will receive NOTIFY packets from
-	 * @param port The UDP/TCP port on which to perform the XFR transfer with the master, set to NULL to use the default of 53
-	 * @param refresh_interval The initial refresh interval with which to perform zone transfers, set to NULL to use the default of 3600 seconds
+	 * @param port The UDP/TCP port on which to perform the XFR transfer with the master, set to NULL to use the default of 53 (Can be null)
+	 * @param refresh_interval The initial refresh interval with which to perform zone transfers, set to NULL to use the default of 3600 seconds (Can be null)
 	 * @return A {@link JSONObject} containing the JSON response from the API server
 	 */
 	public JSONObject createXfrZone(String domain, String host, String master, Integer port, Integer refresh_interval) {
 
 		StringBuilder uriBuilder = new StringBuilder("/api/createXfrZone/?") ;
+		log.debug("Setting API Token") ;
+		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
+
+		if (domain==null) {
+			JSONObject error = new JSONObject() ;
+			try {
+				JSONObject meta = new JSONObject() ;
+				meta.put("success", 0) ;
+				meta.put("error", "Required argument 'domain' is NULL") ;
+				error.put("meta", meta) ;
+			} catch (JSONException e) {
+				log.error("An error was encountered while attempting to return an error message.", e) ;
+			}
+			return error ;
+		} else {
+			if (domain.length()<3) {
+				try {
+					JSONObject error = new JSONObject() ;
+					JSONObject meta = new JSONObject() ;
+					meta.put("success", 0) ;
+					meta.put("error", "The 'domain' argument is too small to be a valid domain.") ;
+					error.put("meta", error) ;
+					return error ;
+				} catch (JSONException e) {
+					log.error("An error was encountered while attempting to return an error message.", e) ;
+				}
+			} else {
+				uriBuilder.append("&domain=").append(domain) ;
+			}
+		}
+
+		if (host!=null) {
+			if (!host.contentEquals("") && !host.toLowerCase().contentEquals("null")) {
+				uriBuilder.append("&host=").append(host) ;
+			}
+		}
+
+		if (master!=null) {
+			try {
+				InetAddress.getByName(master) ;
+				uriBuilder.append("&master=").append(master) ;
+			} catch (UnknownHostException uhe) {
+				try {
+					JSONObject error = new JSONObject() ;
+					JSONObject meta = new JSONObject() ;
+					meta.put("success", 0) ;
+					meta.put("error", "The value '"+master+"' for the 'master' server is not a valid IP address.") ;
+					error.put("meta", meta) ;
+					return error ;
+				} catch (JSONException jsone) {
+					log.error("An error was encountered while attempting to return an error message.", jsone) ;
+				}
+			}
+		} else {
+			try {
+				JSONObject error = new JSONObject() ;
+				JSONObject meta = new JSONObject() ;
+				meta.put("success", 0) ;
+				meta.put("error", "The required argument 'master' is NULL") ;
+				error.put("meta", error) ;
+				return error ;
+			} catch (JSONException jsone) {
+				log.error("An error was encountered while attempting to return an error message.", jsone) ;
+			}
+		}
+
+		if (port!=null) {
+			uriBuilder.append("&port=").append(port) ;
+		}
+
+		if (refresh_interval!=null) {
+			uriBuilder.append("&refresh_interval=").append(refresh_interval) ;
+		}
 
 		return makeHttpRequest(uriBuilder.toString()) ;
 	}
+
+	/**
+	 * 
+	 * @param filter A {@link String} which is used as a case insensitive filter for the city names (Can be null)
+	 * @param countryCode An {@link Integer} which is the ID of a country from the countries list (Can be null)
+	 * @param regionCode An {@link Integer} which is the ID of a region from the regions list (Can be null)
+	 * @param limit An {@link Integer} which indicates the maximum number of results to return (Can be null)
+	 * @param offset An {@link Integer} which indicates the offset at which to start a set of return values (Can be null)
+	 * @param orderBy A {@link String} which indicates which field the list should be sorted by (Can be null)
+	 * @param direction A {@link String} either "ASC" or "DESC" which indicates the direction to sort the results in (Can be null)
+	 * @return A {@link JSONObject} which contains the result status and either error details or returned data
+	 */
+	public JSONObject getCityList(String filter, Integer countryCode, Integer regionCode, Integer limit, Integer offset, String orderBy, String direction) {
+
+		StringBuilder uriBuilder = new StringBuilder("/api/getCityList?") ;
+		log.debug("Setting API Token") ;
+		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
+
+		if (filter!=null) {
+			uriBuilder.append("&filter=").append(filter) ;
+		}
+
+		if (countryCode!=null) {
+			uriBuilder.append("&countryCode=").append(countryCode) ;
+		}
+
+		if (regionCode!=null) {
+			uriBuilder.append("&regionCode=").append(regionCode) ;
+		}
+
+		if (limit!=null) {
+			uriBuilder.append("&limit=").append(limit) ;
+		}
+
+		if (offset!=null) {
+			uriBuilder.append("&offset=").append(offset) ;
+		}
+
+		if (orderBy!=null) {
+			uriBuilder.append("&order_by=").append(orderBy) ;
+		}
+
+		if (direction!=null) {
+			if (direction.toLowerCase().contentEquals("ASC") || direction.toLowerCase().contentEquals("DESC")) {
+				uriBuilder.append("&direction=").append(direction.toUpperCase()) ;
+			}
+		}
+
+		return makeHttpRequest(uriBuilder.toString()) ;
+	}
+
+	/**
+	 * Returns a {@link JSONObject} containing a list of Countries which match the specified filter
+	 * @param filter A {@link String} which is used as a case insensitive filter for the country names/codes (i.e. 'US' will return US and aUStralia and aUStria etc... - Can be null)
+	 * @param limit An {@link Integer} which indicates the maximum number of results to return (Can be null and defaults to 100)
+	 * @param offset An {@link Integer} which indicates the offset at which to start a set of return values (Can be null and defaults to 0)
+	 * @param orderBy A {@link String} which indicates which field the list should be sorted by (Can be null and defaults to the name of the country)
+	 * @param direction A {@link String} either "ASC" or "DESC" which indicates the direction to sort the results in (Can be null and defaults to DESC)
+	 * @return
+	 */
+	public JSONObject getCountryList(String filter, Integer limit, Integer offset, String orderBy, String direction) {
+
+		StringBuilder uriBuilder = new StringBuilder("/api/getCountryList?") ;
+		log.debug("Setting API Token") ;
+		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
+
+		if (filter!=null) {
+			uriBuilder.append("&filter=").append(filter) ;
+		}
+
+		if (limit!=null) {
+			uriBuilder.append("&limit=").append(limit) ;
+		}
+
+		if (offset!=null) {
+			uriBuilder.append("&offset=").append(offset) ;
+		}
+
+		if (orderBy!=null) {
+			uriBuilder.append("&order_by=").append(orderBy) ;
+		}
+
+		if (direction!=null) {
+			if (direction.toLowerCase().contentEquals("ASC") || direction.toLowerCase().contentEquals("DESC")) {
+				uriBuilder.append("&direction=").append(direction.toUpperCase()) ;
+			}
+		}
+
+		return makeHttpRequest(uriBuilder.toString()) ;
+	}
+
+	/**
+	 * Returns a {@link JSONObject} containing a list of Regions which match the specified filter
+	 * @param filter A {@link String} which is used as a case insensitive filter for the region names/codes (i.e. 'ND' will return 'North Dakota' and 'MarylaND' etc... - Can be null)
+	 * @param limit An {@link Integer} which indicates the maximum number of results to return (Can be null)
+	 * @param offset An {@link Integer} which indicates the offset at which to start a set of return values (Can be null)
+	 * @param orderBy A {@link String} which indicates which field the list should be sorted by (Can be null)
+	 * @param direction A {@link String} either "ASC" or "DESC" which indicates the direction to sort the results in (Can be null)
+	 * @return A {@link JSONObject} which contains the result status and either error details or returned data
+	 */
+	public JSONObject getRegionList(String filter, Integer countryCode, Integer limit, Integer offset, String orderBy, String direction) {
+
+		StringBuilder uriBuilder = new StringBuilder("/api/getCityList?") ;
+		log.debug("Setting API Token") ;
+		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
+
+		if (filter!=null) {
+			uriBuilder.append("&filter=").append(filter) ;
+		}
+
+		if (countryCode!=null) {
+			uriBuilder.append("&countryCode=").append(countryCode) ;
+		}
+
+		if (limit!=null) {
+			uriBuilder.append("&limit=").append(limit) ;
+		}
+
+		if (offset!=null) {
+			uriBuilder.append("&offset=").append(offset) ;
+		}
+
+		if (orderBy!=null) {
+			uriBuilder.append("&order_by=").append(orderBy) ;
+		}
+
+		if (direction!=null) {
+			if (direction.toLowerCase().contentEquals("ASC") || direction.toLowerCase().contentEquals("DESC")) {
+				uriBuilder.append("&direction=").append(direction.toUpperCase()) ;
+			}
+		}
+
+		return makeHttpRequest(uriBuilder.toString()) ;
+	}
+
+	/**
+	 * Return a list of all XFR configurations for a given zone.
+	 * @param domain The name of the zone for which the list of XFR configurations is desired.
+	 * @return A {@link JSONObject} containing the result status and either an error message or data.
+	 */
+	public JSONObject getXfrForZone(String domain) {
+		StringBuilder uriBuilder = new StringBuilder("/api/getXfrForZone?") ;
+		log.debug("Setting API Token") ;
+		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
+
+		if (domain!=null) {
+			uriBuilder.append("?domainname=").append(domain) ;
+		}
+
+		return makeHttpRequest(uriBuilder.toString()) ;
+	}
+
+	/**
+	 * Remove the XFR settings for a given domain (and optional sub host)
+	 * @param domain The name of the domain for which the XFR settings will be removed.
+	 * @param host If the XFR settings are on a sub-domain, this would be the hostname of the sub-domain (Can be null for the root of the domain)
+	 * @returnA {@link JSONObject} containing the result status and either an error message.
+	 */
+	public JSONObject removeXfrZone(String domain, String host) {
+		StringBuilder uriBuilder = new StringBuilder("/api/removeXfrZone?") ;
+		log.debug("Setting API Token") ;
+		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
+
+		if (domain!=null) {
+			uriBuilder.append("?domainname=").append(domain) ;
+		}
+
+		if (host!=null) {
+			uriBuilder.append("?host=").append(host) ;
+		}
+
+		return makeHttpRequest(uriBuilder.toString()) ;
+	}
+
+	
 }

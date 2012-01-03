@@ -783,14 +783,125 @@ public class ManagementAPI extends com.dns.api.compiletime.ManagementAPI {
 	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>ttl</code> - (OPTIONAL) The Time-to-live to be set or <code>null</code> for the default TTL<br />
 	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>priority</code> - (OPTIONAL) The priority to set for MX/SRV records or <code>null</code> to leave unchanged.<br />
 	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>isWildcard</code> - (OPTIONAL) Set TRUE if this is a wildcard record, or <code>null</code> or FALSE.<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>geoGroup</code> - (OPTIONAL) Set TRUE if this is a wildcard record, or <code>null</code> or FALSE.<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>country</code> - (OPTIONAL) Set TRUE if this is a wildcard record, or <code>null</code> or FALSE.<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>region</code> - (OPTIONAL) Set TRUE if this is a wildcard record, or <code>null</code> or FALSE.<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>city</code> - (OPTIONAL) Set TRUE if this is a wildcard record, or <code>null</code> or FALSE.<br />
 	 * @return A <code>com.dns.mobile.json.JSONObject</code> containing the JSON response or an error code.
 	 * @throws <code>InvalidArgumentsException</code> If the required arguments are not specified
+	 **/
 	public JSONObject updateRRData(HashMap<String, Object> args) throws InvalidArgumentsException {
 		if (args.get("rrId")!=null && args.get("rdata")!=null) {
-			return super.updateRRData((Integer)args.get("rrId"), (String)args.get("rdata"), (Integer)args.get("ttl"), (Integer)args.get("priority"), (Boolean)args.get("isWildcard")) ;
+			return super.updateRRData((Integer)args.get("rrId"), (String)args.get("rdata"), 
+					(Integer)args.get("ttl"), (Integer)args.get("priority"), (Boolean)args.get("isWildcard"), 
+					(Integer) args.get("retry"), (Integer) args.get("expire"), (Integer) args.get("minimum"), 
+					(Integer) args.get("weight"), (Integer) args.get("port"), (String) args.get("title"), 
+					(String) args.get("keywords"), (String) args.get("description"), 
+					(String)args.get("geoGroup"), (String)args.get("country"), (String)args.get("region"), 
+					(String)args.get("city")) ;
 		} else {
 			throw new InvalidArgumentsException("One or more required arguments are missing.") ;
 		}
 	}
+
+
+	/**
+	 * Create a new XFR configuration for the named domain/sub
+	 * @param args A {@link HashMap} of arguments as listed below<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>domain</code> - The name of the domain to create an XFR configuration for<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>host</code> - This host indicates the "sub" domain that the XFR will work on, set as NULL to create XFR for the root of the domain (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>master</code> - The IP address of the master server which we will poll to get updates and we will receive NOTIFY packets from<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>port</code> - The UDP/TCP port on which to perform the XFR transfer with the master, set to NULL to use the default of 53 (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>refresh_interval</code> - The initial refresh interval with which to perform zone transfers, set to NULL to use the default of 3600 seconds (Can be null)<br />
+	 * @return A {@link JSONObject} containing the JSON response from the API server
 	 */
+	public JSONObject createXfrZone(HashMap<String, Object> args) throws InvalidArgumentsException {
+		if (args.containsKey("domain")) {
+			return createXfrZone((String) args.get("domain"),
+					(String) args.get("host"), (String) args.get("master"),
+					(Integer) args.get("port"),
+					(Integer) args.get("refresh_interval"));
+		} else {
+			throw new InvalidArgumentsException("The required argument 'domain' is missing.") ;
+		}
+	}
+
+	/**
+	 * Returns a {@link JSONObject} containing a list of Cities which match the specified filter
+	 * @param args A {@link HashMap} of arguments as listed below<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>filter</code> - A {@link String} which is used as a case insensitive filter for the city names (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>countryCode</code> - An {@link Integer} which is the ID of a country from the countries list (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>regionCode</code> - An {@link Integer} which is the ID of a region from the regions list (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>limit</code> - An {@link Integer} which indicates the maximum number of results to return (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>offset</code> - An {@link Integer} which indicates the offset at which to start a set of return values (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>orderBy</code> - A {@link String} which indicates which field the list should be sorted by (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>direction</code> - A {@link String} either "ASC" or "DESC" which indicates the direction to sort the results in (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>A {@link JSONObject} which contains the result status and either error details or returned data
+	 */
+	public JSONObject getCityList(HashMap<String, Object> args) {
+		return getCityList((String)args.get("filter"), (Integer)args.get("countryCode"), (Integer)args.get("regionCode"), (Integer)args.get("limit"), (Integer)args.get("offset"), (String)args.get("orderBy"), (String)args.get("direction")) ;
+	}
+
+	/**
+	 * Returns a {@link JSONObject} containing a list of Regions which match the specified filter
+	 * @param args A {@link HashMap} of arguments as listed below<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>filter</code> - A {@link String} which is used as a case insensitive filter for the region names (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>countryCode</code> - An {@link Integer} which is the ID of a country from the countries list (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>limit</code> - An {@link Integer} which indicates the maximum number of results to return (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>offset</code> - An {@link Integer} which indicates the offset at which to start a set of return values (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>orderBy</code> - A {@link String} which indicates which field the list should be sorted by (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>direction</code> - A {@link String} either "ASC" or "DESC" which indicates the direction to sort the results in (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>A {@link JSONObject} which contains the result status and either error details or returned data
+	 */
+	public JSONObject getRegionList(HashMap<String, Object> args) {
+		return getRegionList((String)args.get("filter"), (Integer)args.get("countryCode"), (Integer)args.get("limit"), (Integer)args.get("offset"), (String)args.get("orderBy"), (String)args.get("direction")) ;
+	}
+
+	/**
+	 * Returns a {@link JSONObject} containing a list of Countries which match the specified filter
+	 * @param args A {@link HashMap} of arguments as listed below<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>filter</code> - A {@link String} which is used as a case insensitive filter for the country names (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>limit</code> - An {@link Integer} which indicates the maximum number of results to return (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>offset</code> - An {@link Integer} which indicates the offset at which to start a set of return values (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>orderBy</code> - A {@link String} which indicates which field the list should be sorted by (Can be null)<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>direction</code> - A {@link String} either "ASC" or "DESC" which indicates the direction to sort the results in (Can be null)<br />
+	 * @return A {@link JSONObject} which contains the result status and either error details or returned data
+	 */
+	public JSONObject getCountryList(HashMap<String, Object> args) {
+		return getCountryList((String)args.get("filter"), (Integer)args.get("limit"), (Integer)args.get("offset"), (String)args.get("orderBy"), (String)args.get("direction")) ;
+	}
+
+	/**
+	 * Return a list of all XFR configurations for a given zone.
+	 * @param args A {@link HashMap} of arguments as listed below<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>domain</code> - A {@link String} containing the domain name of the zone for which we wish to see a list of XFR configurations.
+	 * @return A {@link JSONObject} which contains the result status and either error details or returned data
+	 * @throws InvalidArgumentsException
+	 */
+	public JSONObject getXfrForZone(HashMap<String, Object> args) throws InvalidArgumentsException {
+		if (args.get("domain")!=null) {
+			return getXfrForZone((String)args.get("domain")) ;
+		} else {
+			throw new InvalidArgumentsException("The required argument 'domain' has not been provided.") ;
+		}
+	}
+
+	/**
+	 * Remove the XFR settings for a given domain (and optional sub host)
+	 * @param args A {@link HashMap} of arguments as listed below<br />
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>domain</code> - A {@link String} containing the domain name of the zone for which we wish to see a list of XFR configurations.
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>host</code> - A {@link String} representing the sub-domain for which the XFR settings will be removed (OPTIONAL, defaults to the root of the zone)
+	 * @return A {@link JSONObject} which contains the result status or error details.
+	 * @throws InvalidArgumentsException
+	 */
+	public JSONObject removeXfrZone(HashMap<String, Object> args) throws InvalidArgumentsException {
+		if (args.get("domain")!=null) {
+			if (args.get("host")==null) {
+				args.put("host", "") ;
+			}
+			return removeXfrZone((String)args.get("domain"), (String)args.get("host")) ;
+		} else {
+			throw new InvalidArgumentsException("Required argument 'domain' has not been specified.") ;
+		}
+	}
 }
