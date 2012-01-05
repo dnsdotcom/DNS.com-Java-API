@@ -1,4 +1,13 @@
 A Java implementation of the DNS.com API.
 
-This API requires the SLF4J library in order to perform logging.
+This API requires the SLF4J library in order to perform logging. It also requires the Apache HTTPClient 
+library to perform API calls to the ReSTful web service.
+ 
 See the SLF4J web site for information on how to use that library (http://www.slf4j.org/)
+See the HTTPClient web site for information on how to use that library (http://hc.apache.org/downloads.cgi)
+
+See the DNS.com-Java-API Wiki for instructions on using this library or building it from source:
+https://github.com/dnsdotcom/DNS.com-Java-API/wiki
+
+You can download pre-build binaries of this library and it's associated JavaDocs from the downloads section:
+https://github.com/dnsdotcom/DNS.com-Java-API/downloads
