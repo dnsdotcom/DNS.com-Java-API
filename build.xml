@@ -20,7 +20,7 @@
 
 	<target name="build">
 		<mkdir dir="${bindir}" />
-		<javac srcdir="${srcdir}" destdir="${bindir}" debug="${dns.debug}">
+		<javac srcdir="${srcdir}" destdir="${bindir}" debug="${with.debugging}" excludes="org/json/Test.java">
 			<classpath refid="classpath" />
 		</javac>
 	</target>
