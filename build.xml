@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<project name="dnsapi" default="jar" basedir=".">
+	<property id="srcdir" name="srcdir" location="${basedir}/src" />
+	<property id="bindir" name="bindir" location="${basedir}/bin" />
+	<property id="libdir" name="libdir" location="${basedir}/lib" />
+	<property id="docdir" name="docdir" location="${basedir}/javadoc" />
+
+	<path id="classpath">
+		<pathelement path="${http.client.path}"/>
+		<pathelement path="${http.core.path}"/>
+		<pathelement path="${http.mime.path}"/>
+		<pathelement path="${commons.logging.path}"/>
+		<pathelement path="${commons.codec.path}"/>
+		<pathelement path="${slf4j.core.path}"/>
+	</path>
+
+	<target name="clean">
+		<delete dir="${bindir}" />
+	</target>
+
+	<target name="build">
+		<mkdir dir="${bindir}" />
+		<javac srcdir="${srcdir}" destdir="${bindir}" debug="${dns.debug}">
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="build">
+		<mkdir dir="${basedir}/build" />
+		<delete file="${basedir}/build/dnsapi.jar" />
+		<jar destfile="${basedir}/build/dnsapi.jar">
+			<fileset dir="${basedir}/bin" />
+		</jar>
+	</target>
+
+	<target name="javadoc">
+		<mkdir dir="${docdir}" />
+		<javadoc sourcepath="${srcdir}" destdir="${docdir}">
+			<classpath refid="classpath" />
+		</javadoc>
+	</target>
+</project>
