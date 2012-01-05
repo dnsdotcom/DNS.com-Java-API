@@ -36,8 +36,14 @@
 
 	<target name="javadoc">
 		<mkdir dir="${docdir}" />
-		<javadoc sourcepath="${srcdir}" destdir="${docdir}">
+		<javadoc sourcepath="${srcdir}" destdir="${docdir}" excludepackagenames="org.json">
 			<classpath refid="classpath" />
 		</javadoc>
+	</target>
+
+	<target name="docjar">
+		<jar destfile="${basedir}/build/dnsapidoc.jar" index="false" description="DNS.com Java API Docs">
+			<fileset dir="${docdir}" />
+		</jar>
 	</target>
 </project>
