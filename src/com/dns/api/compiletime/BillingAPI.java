@@ -32,7 +32,7 @@ public class BillingAPI extends GenericAPI {
 	 * @param domain The domain to retrieve the hit count for
 	 * @param start (OPTIONAL) The start date for the window to retrieve stats for
 	 * @param end (OPTIONAL) The end date for the window to retrieve stats for
-	 * @return A <code>com.dns.mobile.json.JSONObject</code> containing the JSON response or an error code.
+	 * @return A {@link JSONObject} containing the JSON response or an error code.
 	 */
 	public JSONObject getHits(String domain, Date start, Date end) {
 		StringBuilder uriBuilder = new StringBuilder("/api/getHits/?") ;

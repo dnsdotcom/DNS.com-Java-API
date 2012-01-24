@@ -42,7 +42,7 @@ public class ResellerAPI extends GenericAPI {
 	 * @param fax (OPTIONAL) The new user's fax number
 	 * @param company (OPTIONAL) The new user's company name
 	 * @param sendWelcomeMail (OPTIONAL) Set to "yes" or "no" to send the new user a welcome e-mail.
-	 * @return A <code>com.dns.mobile.json.JSONObject</code> containing the JSON response or an error code.
+	 * @return A {@link JSONObject} containing the JSON response or an error code.
 	 */
 	public JSONObject createNewUser(String resellerCode, String eMail, String password,
 			String passConfirm, String forename, String surname, String phone, String addr1,
@@ -106,7 +106,7 @@ public class ResellerAPI extends GenericAPI {
 	 * Get the specified user's details
 	 * @param resellerCode The unique ID of the reseller creating the use new user account
 	 * @param eMail The new user's e-mail address
-	 * @return A <code>com.dns.mobile.json.JSONObject</code> containing the JSON response or an error code.
+	 * @return A {@link JSONObject} containing the JSON response or an error code.
 	 */
 	public JSONObject getUserDetails(String resellerCode, String eMail) {
 		StringBuilder uriBuilder = new StringBuilder("/api/getUserDetails/?") ;
@@ -121,7 +121,7 @@ public class ResellerAPI extends GenericAPI {
 	 * Get a list of users for the given reseller ID and optionally filtered by the filter argument
 	 * @param resellerCode The unique ID of the reseller creating the use new user account
 	 * @param filter A case insensitive search filter to limit which users accounts are retrieved
-	 * @return A <code>com.dns.mobile.json.JSONObject</code> containing the JSON response or an error code.
+	 * @return A {@link JSONObject} containing the JSON response or an error code.
 	 */
 	public JSONObject getUserList(String resellerCode, String filter) {
 		StringBuilder uriBuilder = new StringBuilder("/api/getUserList/?") ;

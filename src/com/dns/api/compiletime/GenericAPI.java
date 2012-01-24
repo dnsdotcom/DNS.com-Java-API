@@ -79,9 +79,9 @@ public class GenericAPI {
 
 	/**
 	 * Takes a protocol string and a URI and makes an HTTP request. Returns a parsed
-	 * <code>com.dns.mobile.json.JSONObject</code> from the results.
+	 * {@link JSONObject} from the results.
 	 * @param req The portion of the URL after the host name
-	 * @return A <code>com.dns.mobile.json.JSONObject</code> containing the results of the request.
+	 * @return A {@link JSONObject} containing the results of the request.
 	 */
 	protected JSONObject makeHttpRequest(String req) {
 		String protocol = this.useSSL?"https":"http" ;
