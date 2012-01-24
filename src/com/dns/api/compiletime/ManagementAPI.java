@@ -1400,7 +1400,37 @@ public class ManagementAPI extends GenericAPI {
 	/**
 	 * Return a list of all XFR configurations for a given zone.
 	 * @param domain The name of the zone for which the list of XFR configurations is desired.
-	 * @return A {@link JSONObject} containing the result status and either an error message or data.
+	 * @return A {@link JSONObject} containing the result status and either an error message or data as detailed below<br /><pre>
+	 * {
+	 * 		"meta": {
+	 * 			"code": 200, 
+	 * 			"success": 1
+	 * 		}, 
+	 * 		"data": [
+	 * 			{
+	 * 				"xfr_type": 1, 
+	 * 				"master": "1.2.3.4", 
+	 * 				"zone": "1voiceministries.net", 
+	 * 				"last_transfer": "2012-01-24 10:43:00", 
+	 * 				"domain_id": 694732, 
+	 * 				"serial": 1, 
+	 * 				"refresh_interval": 1200, 
+	 * 				"id": 6, 
+	 * 				"port": 53
+	 * 			}
+	 * 		]
+	 * }
+	 * </pre>
+	 * or
+	 * <pre>
+	 * {
+	 * 		"meta": {
+	 * 			"code": 400, 
+	 * 			"success": 0, 
+	 * 			"error": "Domain name not specified"
+	 * 		}
+	 * }
+	 * </pre>
 	 */
 	public JSONObject getXfrForZone(String domain) {
 		StringBuilder uriBuilder = new StringBuilder("/api/getXfrForZone?") ;
