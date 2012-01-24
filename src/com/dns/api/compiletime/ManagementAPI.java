@@ -182,20 +182,6 @@ public class ManagementAPI extends GenericAPI {
 	}
 
 	/**
-	 * Create a new domain group with the specified name
-	 * @param group The name of the new domain group to be created.
-	 * @return A {@link JSONObject} containing the JSON response or an error code.
-	 */
-	public JSONObject createGeoGroup(String group) {
-		StringBuilder uriBuilder = new StringBuilder("/api/createDomainGroup/?") ;
-		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
-
-		uriBuilder.append("&group="+group) ;
-
-		return makeHttpRequest(uriBuilder.toString()) ;
-	}
-
-	/**
 	 * Create a new hostname in the specifed domain/group
 	 * @param name The name of the domain/group to have the host added to
 	 * @param isGroup Is this change for a domain or a group?
@@ -904,29 +890,15 @@ public class ManagementAPI extends GenericAPI {
 	}
 
 	/**
-	 * Return the details about a specific GeoGroup.
-	 * @param group The name of the geogroup to get the details for.
+	 * Create a new domain group with the specified name
+	 * @param group The name of the new domain group to be created.
 	 * @return A {@link JSONObject} containing the JSON response or an error code.
 	 */
-	public JSONObject getGeoGroupDetails(String name) {
-		StringBuilder uriBuilder = new StringBuilder("/api/getGeoGroupDetails/?") ;
+	public JSONObject createGeoGroup(String group) {
+		StringBuilder uriBuilder = new StringBuilder("/api/createDomainGroup/?") ;
 		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
 
-		uriBuilder.append("&name="+name) ;
-
-		return makeHttpRequest(uriBuilder.toString()) ;
-	}
-
-	/**
-	 * Return a list of GeoGroups which match the specified filter string.
-	 * @param filter A case insensitive search filter or "" for all.
-	 * @return A {@link JSONObject} containing the JSON response or an error code.
-	 */
-	public JSONObject getGeoGroups(String filter) {
-		StringBuilder uriBuilder = new StringBuilder("/api/getGeoGroups/?") ;
-		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
-
-		uriBuilder.append("&search_term="+filter) ;
+		uriBuilder.append("&group="+group) ;
 
 		return makeHttpRequest(uriBuilder.toString()) ;
 	}

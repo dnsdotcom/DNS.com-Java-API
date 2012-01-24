@@ -15,7 +15,95 @@ public class GeoAPI extends GenericAPI {
 	}
 
 	/**
-	 * 
+	 * Add a geo location to an existing GeoGroup
+	 * @param name (REQUIRED) A {@link String} containing the name of the geogroup to be modified
+	 * @param isoCode (REQUIRED) A {@link String} containing the 2 character ISO country code of the country to be added as part of this location 
+	 * @param region (OPTIONAL) A {@link String} containing the name of the region to be added as part of this location (Without a region, a city is invalid)
+	 * @param city (OPTIONAL) A {@link String} containing the name of the city to be added as part of this location (A region is required in order to specify a city)
+	 * @return A {@link JSONObject} containing the result status of the action as detailed below:<br /><pre>
+	 * {"meta":
+	 * 		{
+	 * 			"code": 200, 
+	 * 			"id": 22, 
+	 * 			"success": 1
+	 * 		}
+	 * }
+	 * </pre> or <pre>
+	 * {"meta": 
+	 * 		{
+	 * 			"code": 400, 
+	 * 			"success": 0, 
+	 * 			"error": "Name and ISO2 code are both required"
+	 * 		}
+	 * }
+	 * </pre>
+	 */
+	public JSONObject appendToGeoGroup(String name, String isoCode, String region, String city) {
+		StringBuilder uriBuilder = new StringBuilder("/api/appendToGeoGroup/?") ;
+		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
+
+		if (name!=null) {
+			if (!("null".contentEquals(name.toLowerCase()))) {
+				uriBuilder.append("&name=") ;
+				uriBuilder.append(name) ;
+			}
+		}
+
+		if (isoCode!=null) {
+			if (!("null".contentEquals(isoCode.toLowerCase()))) {
+				uriBuilder.append("&iso2_code=") ;
+				uriBuilder.append(isoCode) ;
+			}
+		}
+
+		if (region!=null) {
+			if (!("null".contentEquals(region.toLowerCase()))) {
+				uriBuilder.append("&region=") ;
+				uriBuilder.append(region) ;
+
+				// Only try to add a city if a region was specified
+				if (city!=null) {
+					if (!("null".contentEquals(city.toLowerCase()))) {
+						uriBuilder.append("&city=") ;
+						uriBuilder.append(city) ;
+					}
+				}
+			}
+		}
+
+		return makeHttpRequest(uriBuilder.toString()) ;
+	}
+
+	/**
+	 * Return the details about a specific GeoGroup.
+	 * @param group The name of the geogroup to get the details for.
+	 * @return A {@link JSONObject} containing the JSON response or an error code.
+	 */
+	public JSONObject getGeoGroupDetails(String name) {
+		StringBuilder uriBuilder = new StringBuilder("/api/getGeoGroupDetails/?") ;
+		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
+
+		uriBuilder.append("&name="+name) ;
+
+		return makeHttpRequest(uriBuilder.toString()) ;
+	}
+
+	/**
+	 * Return a list of GeoGroups which match the specified filter string.
+	 * @param filter A case insensitive search filter or "" for all.
+	 * @return A {@link JSONObject} containing the JSON response or an error code.
+	 */
+	public JSONObject getGeoGroups(String filter) {
+		StringBuilder uriBuilder = new StringBuilder("/api/getGeoGroups/?") ;
+		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
+
+		uriBuilder.append("&search_term="+filter) ;
+
+		return makeHttpRequest(uriBuilder.toString()) ;
+	}
+
+	/**
+	 * Return a list of countries which match the provided filter information
 	 * @param filter (OPTIONAL) A filter to limit which countries are returned. The filter applies to the 2 character country code as well as the country name.
 	 * @param limit (OPTIONAL) An {@link Integer} representing the maximum number of results to return 
 	 * @param offset (OPTIONAL) An {@link Integer} representing the offset from the start of the list from which to return results (i.e. if the result list contains 500 items and the limit is 30 and the offset is 10, return items 11-40)
@@ -50,7 +138,7 @@ public class GeoAPI extends GenericAPI {
 		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
 
 		if (filter!=null) {
-			if ("null".contentEquals(filter.toLowerCase())) {
+			if (!("null".contentEquals(filter.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("filter=") ;
 				uriBuilder.append(filter) ;
@@ -70,7 +158,7 @@ public class GeoAPI extends GenericAPI {
 		}
 
 		if (order_by!=null) {
-			if ("null".contentEquals(order_by.toLowerCase())) {
+			if (!("null".contentEquals(order_by.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("order_by=") ;
 				uriBuilder.append(order_by.toLowerCase()) ;
@@ -78,7 +166,7 @@ public class GeoAPI extends GenericAPI {
 		}
 
 		if (direction!=null) {
-			if ("null".contentEquals(direction.toLowerCase())) {
+			if (!("null".contentEquals(direction.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("direction=") ;
 				uriBuilder.append(direction.toLowerCase()) ;
@@ -122,7 +210,7 @@ public class GeoAPI extends GenericAPI {
 		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
 
 		if (filter!=null) {
-			if ("null".contentEquals(filter.toLowerCase())) {
+			if (!("null".contentEquals(filter.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("filter=") ;
 				uriBuilder.append(filter) ;
@@ -130,7 +218,7 @@ public class GeoAPI extends GenericAPI {
 		}
 
 		if (countryCode!=null) {
-			if ("null".contentEquals(countryCode.toLowerCase())) {
+			if (!("null".contentEquals(countryCode.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("countryCode=") ;
 				uriBuilder.append(countryCode) ;
@@ -150,7 +238,7 @@ public class GeoAPI extends GenericAPI {
 		}
 
 		if (order_by!=null) {
-			if ("null".contentEquals(order_by.toLowerCase())) {
+			if (!("null".contentEquals(order_by.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("order_by=") ;
 				uriBuilder.append(order_by.toLowerCase()) ;
@@ -158,7 +246,7 @@ public class GeoAPI extends GenericAPI {
 		}
 
 		if (direction!=null) {
-			if ("null".contentEquals(direction.toLowerCase())) {
+			if (!("null".contentEquals(direction.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("direction=") ;
 				uriBuilder.append(direction.toLowerCase()) ;
@@ -215,7 +303,7 @@ public class GeoAPI extends GenericAPI {
 		uriBuilder.append("AUTH_TOKEN="+apiToken) ;
 
 		if (filter!=null) {
-			if ("null".contentEquals(filter.toLowerCase())) {
+			if (!("null".contentEquals(filter.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("filter=") ;
 				uriBuilder.append(filter) ;
@@ -223,7 +311,7 @@ public class GeoAPI extends GenericAPI {
 		}
 
 		if (countryCode!=null) {
-			if ("null".contentEquals(countryCode.toLowerCase())) {
+			if (!("null".contentEquals(countryCode.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("countryCode=") ;
 				uriBuilder.append(countryCode) ;
@@ -249,7 +337,7 @@ public class GeoAPI extends GenericAPI {
 		}
 
 		if (order_by!=null) {
-			if ("null".contentEquals(order_by.toLowerCase())) {
+			if (!("null".contentEquals(order_by.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("order_by=") ;
 				uriBuilder.append(order_by.toLowerCase()) ;
@@ -257,7 +345,7 @@ public class GeoAPI extends GenericAPI {
 		}
 
 		if (direction!=null) {
-			if ("null".contentEquals(direction.toLowerCase())) {
+			if (!("null".contentEquals(direction.toLowerCase()))) {
 				uriBuilder.append("&") ;
 				uriBuilder.append("direction=") ;
 				uriBuilder.append(direction.toLowerCase()) ;
