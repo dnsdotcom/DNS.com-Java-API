@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 /**
  * An implementation of the Reseller API which validates arguments at compile time
- * @author Deven Phillips <deven.phillips@gmail.com>
+ * @author <a href="mailto: deven@dns.com">Deven Phillips</a>
  */
 public class ResellerAPI extends GenericAPI {
 

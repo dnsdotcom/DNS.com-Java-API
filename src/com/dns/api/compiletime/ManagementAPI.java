@@ -16,7 +16,7 @@ import org.json.JSONObject;
 
 /**
  * An implementation of the Management API which validates arguments at compile time
- * @author Deven Phillips <deven.phillips@gmail.com>
+ * @author <a href="mailto: deven@dns.com">Deven Phillips</a>
  */
 public class ManagementAPI extends GenericAPI {
 
